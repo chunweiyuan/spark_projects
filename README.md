@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Download Spark from http://spark.apache.org/downloads.html 
 Download Scala from http://www.scala-lang.org/download (find the version number in README inside spark archive). 
 
@@ -19,6 +18,3 @@ export PYTHONPATH=$PYTHONPATH:$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.8
 **If Macports is used to install Python, the following might to be in the path for thunder-python (or other programs installed by pip) to be found**
 
 export PATH = $PATH:/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin
-=======
-# spark_projects
->>>>>>> de6bffeeeb66b6cf0ec4192626d1b5ab62a7ca7f
