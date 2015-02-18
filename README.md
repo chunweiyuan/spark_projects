@@ -30,7 +30,7 @@ export PATH = $PATH:/opt/local/Library/Frameworks/Python.framework/Versions/2.7/
 ```
 
 # Installation of Thunder
-github.com/thunder-project/thunder
+From the Jeremy Freeman lab: http://github.com/thunder-project/thunder
 
 For me I had to find the installed thunder executables (thunder, thunder-submit) and add their path to PATH in .bashrc:
 
