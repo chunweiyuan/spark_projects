@@ -6,10 +6,14 @@ It's entirely questionable why anyone would use a neural net for this particular
 
 To run the code, simply type
 
+```
 python neural_weather.py
+```
 
 To run on Spark (locally, with 2 cores), 
 
+```
 MASTER=local[2] /usr/local/bin/spark/bin/spark-submit neural_weather.py
+```
 
 One can change the number_of_locations in the code to as high as 500.  Also, cross-validation/test errors are computed in the object, but not exported.
