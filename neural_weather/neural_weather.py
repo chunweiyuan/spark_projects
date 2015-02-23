@@ -8,6 +8,8 @@ import bpnn
 
 ###-------------------------------------------------------------------------------------
 class NeuralWeather:
+      # This class was developed before I learned Pandas.
+      # A lot of the data manipulation would've been simpler with Pandas.
 
       def __init__(self, filename, number_of_locations): # number of locations is an input
           
@@ -137,45 +139,56 @@ class NeuralWeather:
           predicts = []
           n_inputs = range(2,11)
           for n_prior_years in n_inputs:  # I only try between 2-10 inputs       
-              tr_set, xv_set, ts_set = self.get_sets(location, month, day, n_prior_years)
+              tr_set, xv_set, ts_set = self.get_sets(location, month, day, n_prior_years) # get the training, validation, and test sets
               network = bpnn.NN(n_prior_years, n_prior_years, 1) # hidden layer has same number of units as inputs.  Output = 1 unit
               network.train(tr_set, iterations=iterations) # training the network
               networks.append(network)
-              xv_errors.append( self.prediction_error(network, xv_set) )
-              test_errors.append( self.prediction_error(network, ts_set) )
+              xv_errors.append( self.prediction_error(network, xv_set) * 100.0)
+              test_errors.append( self.prediction_error(network, ts_set) * 100.0)
               predicts.append( int( round( network.update(ts_set[-1][0])[0] * 100.0 ) ) )        
           xv_error, index = min((val, idx) for (idx, val) in enumerate(xv_errors)) # finds the minimum cross-validation error
           network  = networks[index]
           test_error = test_errors[index]
           n_prior_years = n_inputs[index]
           prediction = predicts[index]
-          return network, xv_error, test_error, n_prior_years, prediction
-
+          return network, n_prior_years, prediction, xv_error, test_error
 
 
       # this is a routine that performs next year's forecast, and then pipes them out to stdout
-      def next_year_forecast(self):          
+      def next_year_forecast(self):
+          self.setup_output_files()      
           next_year = max(self.years) + 1 # this is the "next year"
-          four_years_ago = next_year - 4 # well, just in case this is also a leap year
-          writer = csv.writer(open('output.csv','w')) # to output in csv format
+          four_years_ago = next_year - 4 # well, just in case this is also a leap year           
           for i in range(self.number_of_months):
               month = i + 1
               for j in range(self.number_of_days):
                   day = j + 1
                   date = str(next_year) + '-' + str(month) + '-' + str(day) # the date string
-                  row = [] # initialize the "row" to be outputed
-                  row.append(date) # first append the date
-                  for k in range(len(self.biglist)):
-                      location = k + 1
+                  prow, xvrow, trow  = ([date],[date],[date]) # initialize the "row" to be outputed
+                  for k in range(len(self.biglist)): # go through the locations
+                      location = k + 1 # index of the locations
                       # because j goes from 1 to 31, and not all months have 31 days, so 
                       # I need the following conditional statement, such that
                       # I only evaluate the days that exist
                       if len( self.tell(location, four_years_ago, month, day) ) > 0:
                          results = self.optimize_network(location,month,day,iterations=100)
-                         temperature = str(results[-1]) # convert [integer] to string
-                         row.append(temperature)  # append to row
-                  if len(row) > 1: # if row actually contains temperature data
-                      writer.writerow(row) # output to stdout
+                         prow.append( str(results[2]) )  # append to row
+                         xvrow.append( str(results[3]) )
+                         trow.append( str(results[4]) )
+                  if len(prow) > 1: self.write_output_files(prow, xvrow, trow)
+
+
+      def setup_output_files(self):
+          self.predicter = csv.writer(open('prediction.csv','w'))
+          self.xver      = csv.writer(open('xverror.csv','w'))
+          self.tester    = csv.writer(open('testerror.csv','w'))
+
+    
+      def write_output_files(self, prow, xvrow, trow):
+          self.predicter.writerow(prow)
+          self.xver.writerow(xvrow)
+          self.tester.writerow(trow)
+            
 ###--------------------------------------------------------------------------------                
        
 
