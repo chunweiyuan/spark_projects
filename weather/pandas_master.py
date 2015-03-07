@@ -1,8 +1,9 @@
 import csv
 import sys
-import numpy
+import numpy as np
 import datetime
 import pandas as pd
+from kalman import Kalman1D
 
 ###-------------------------------------------------------------------------------------
 class PandasMaster(object):
@@ -45,17 +46,29 @@ class PandasMaster(object):
                  self.df.loc[filter(lambda x: x[-5:]==monthday, self.df.index),loc].tolist()
          
       
-      def get_sets(self, location, month, day, n_prior_years):
+      def filter(self, series, n): # filters the series up to the n-th element
+          E = (max(series) - min(series)) / 2.0
+          kalman =  Kalman1D( A = np.matrix([1]), B = np.matrix([0]), H = np.matrix([1]), 
+                              x0 = np.matrix([series[0]]), P0 = np.matrix([E]), 
+                              Q = np.matrix([E]), R = np.matrix([E]) )
+          for i in range(n):
+              kalman.update(np.matrix([0]),np.matrix([series[i]]))
+              series[i] = kalman.current_state()[0]
+          return series
+
+
+      def get_sets(self, location, month, day, n_prior_years, filter=False):
           # creating the training, cross validation, and test sets
           years, temperatures = self.day_history(location, month, day)
-          temp = (numpy.array(temperatures)).tolist()
+          inputs, outputs = ((np.array(temperatures)).tolist(), (np.array(temperatures)).tolist())
           n_observations = len(years) - n_prior_years  # number of patterns for this location
           n_training_set = int(n_observations * 0.6) # the size of training set
           n_xv_set       = int(n_observations * 0.2) # the size of cross validation set
           n_test_set     = n_observations - n_training_set - n_xv_set # the size of test set
-          training_set = [[temp[i:(i+n_prior_years)],[temp[i+n_prior_years]]] for i in range(n_training_set)]
-          xv_set       = [[temp[i:(i+n_prior_years)],[temp[i+n_prior_years]]] for i in range(n_training_set,n_training_set+n_xv_set)]
-          test_set     = [[temp[i:(i+n_prior_years)],[temp[i+n_prior_years]]] for i in range(n_training_set+n_xv_set,n_observations)]
+          if filter: inputs = self.filter(inputs, len(inputs))
+          training_set = [[inputs[i:(i+n_prior_years)],[outputs[i+n_prior_years]]] for i in range(n_training_set)]
+          xv_set       = [[inputs[i:(i+n_prior_years)],[outputs[i+n_prior_years]]] for i in range(n_training_set,n_training_set+n_xv_set)]
+          test_set     = [[inputs[i:(i+n_prior_years)],[outputs[i+n_prior_years]]] for i in range(n_training_set+n_xv_set,n_observations)]
           return training_set, xv_set, test_set
 
 
@@ -64,7 +77,7 @@ class PandasMaster(object):
           return [0,0,0,0,0]
 
 
-      def next_year_forecast(self):
+      def next_year_forecast(self, filter=False):
           # this is a routine that performs next year's forecast, and then pipes them out to csv files
           # it does not forecast February 29s    
           self.setup_output_files() 
@@ -76,7 +89,7 @@ class PandasMaster(object):
                   prow, xvrow, trow  = ([date],[date],[date]) # initialize the "row" to be outputed
                   for location in range(1,self.nloc+1): # location index
                       if self.get_temperature(location, four_years_ago, month, day) is not None:
-                         results = self.learn(location, month, day)
+                         results = self.learn(location, month, day, filter=filter)
                          prow.append( str(results['predict']) )  # append to row
                          xvrow.append( str(results['xverr']) )
                          trow.append( str(results['terr']) )
