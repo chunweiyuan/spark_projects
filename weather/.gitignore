@@ -1,3 +1,4 @@
+*.csv
 *.pnc
 predict*
 xv*
