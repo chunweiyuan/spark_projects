@@ -45,7 +45,11 @@ class NeuralWeather(PandasMaster):
 
 if __name__=='__main__':
 
-   weatherman = NeuralWeather(file='weather_data.csv', number_of_locations=5,\
+   weatherman = NeuralWeather(file='weather_data.csv', number_of_locations=20,\
                               pfile='predict.csv', xfile='xv.csv', tfile='test.csv') # initialize the class object
    weatherman.next_year_forecast(filter=False) # perform the forecast and output to csv file
+
+   weatherman = NeuralWeather(file='weather_data.csv', number_of_locations=20,\
+                              pfile='predict_filtered.csv', xfile='xv_filtered.csv', tfile='test_filtered.csv') # initialize the class object
+   weatherman.next_year_forecast(filter=True) # perform the forecast and output to csv file
            
