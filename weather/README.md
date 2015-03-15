@@ -28,3 +28,12 @@ One can change the number_of_locations in the code to as high as 500.  Also, cro
 The Kalman filter implemented here assumes there's no control vector; as such, it's used essentially as a noise filtering technique (see the ipython notebook in this repo).  One can run the filter through the temperature measurements for each location first, before feeding the filtered data into the neural network for training/prediction.
 
 Alternatively, one could also assume that the underlying state is stationary, and everything observed is just noise.  Then the prediction for next year's max temperature, for a given location and date, is just the current tempearture state is that location/date.
+
+
+## Simple Average
+Within the PandasMaster class, the native learning algorithm is a simple average of the first 29 years, tested on the 30th.  When tested over 20 locations over the entire year of 2010, this simple average turns out to yield the best prediciton (as shown in the ipython notebook):
+
+```
+e(simple avg) < e(kalman + simple avg) < e(kalman + neural net) < e(neural net) 
+```
+

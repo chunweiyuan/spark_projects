@@ -72,9 +72,15 @@ class PandasMaster(object):
           return training_set, xv_set, test_set
 
 
-      def learn(self, location, month, day):
-          # this is just a placeholder here.  Will be overridden by subclasses.
-          return [0,0,0,0,0]
+      def learn(self, location, month, day, filter=False):
+          # The native learning algorithm is simply taking the average of the first 29 years and test on the 30th
+          # In the sub-classes this will be overwritten
+          years, temperatures = self.day_history(location, month, day)
+          if filter: temperatures = self.filter(temperatures, len(temperatures)-1)
+          predict = float(np.mean(temperatures[0:-1]))
+          n_prior_years = len(temperatures[0:-1])
+          error = float( np.abs( temperatures[-1] - predict ) )
+          return dict(obj=None, n_prior_years=n_prior_years, predict=predict, xverr=error, terr=error)
 
 
       def next_year_forecast(self, filter=False):
@@ -112,4 +118,9 @@ class PandasMaster(object):
        
 
 if __name__=='__main__':
-   pass
+   weatherman = PandasMaster(file ='weather_data.csv', 
+                             number_of_locations = 20,
+                             pfile = 'predict_simpleavg_filtered.csv', 
+                             xfile = 'xv_simpleavg_filtered.csv', 
+                             tfile = 'test_simpleavg_filtered.csv') # initialize the class object
+   weatherman.next_year_forecast(filter=True) # perform the forecast and output to csv file

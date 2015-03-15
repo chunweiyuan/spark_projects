@@ -1,5 +1,5 @@
 *.csv
-*.pnc
+*.pyc
 predict*
 xv*
 test*
