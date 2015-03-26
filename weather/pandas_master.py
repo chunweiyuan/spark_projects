@@ -46,7 +46,7 @@ class PandasMaster(object):
                  self.df.loc[filter(lambda x: x[-5:]==monthday, self.df.index),loc].tolist()
          
       
-      def filter(self, series, n): # filters the series up to the n-th element
+      def filter(self, series, n): # filters the series up to the n-th element.  Here series is a list, not a Pandas Series.
           E = (max(series) - min(series)) / 2.0
           kalman =  Kalman1D( A = np.matrix([1]), B = np.matrix([0]), H = np.matrix([1]), 
                               x0 = np.matrix([series[0]]), P0 = np.matrix([E]), 
@@ -76,8 +76,8 @@ class PandasMaster(object):
           # The native learning algorithm is simply taking the average of the first 29 years and test on the 30th
           # In the sub-classes this will be overwritten
           years, temperatures = self.day_history(location, month, day)
-          if filter: temperatures = self.filter(temperatures, len(temperatures)-1)
-          predict = float(np.mean(temperatures[0:-1]))
+          if filter: temperatures = self.filter(temperatures, len(temperatures)-1) # the last one is not filtered, for testing purposes
+          predict = float(np.mean(temperatures[0:-1]))  # a simple average of the first n-1 data points
           n_prior_years = len(temperatures[0:-1])
           error = float( np.abs( temperatures[-1] - predict ) )
           return dict(obj=None, n_prior_years=n_prior_years, predict=predict, xverr=error, terr=error)

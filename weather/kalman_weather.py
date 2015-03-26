@@ -45,8 +45,9 @@ class KalmanWeather(PandasMaster):
               for col in df.columns:
                   series = df.loc[filter(lambda x: x[-5:]==date,df.index),col] # same month-day, multiple years
                   E = (series.max() - series.min()) / 2.0
-                  kalman =  Kalman1D( A = np.matrix([1]), B = np.matrix([0]), H = np.matrix([1]), x0 = np.matrix([series.iloc[0]]), 
-                                      P0 = np.matrix([E]), Q = np.matrix([E]), R = np.matrix([E]) )
+                  kalman =  Kalman1D( A = np.matrix([1]), B = np.matrix([0]), H = np.matrix([1]), 
+                                      x0 = np.matrix([series.iloc[0]]), P0 = np.matrix([E]), 
+                                      Q = np.matrix([E]), R = np.matrix([E]) )
                   for idx in series.index:
                       kalman.update(np.matrix([0]),np.matrix([series.loc[idx]]))
                       df.loc[idx,col] = kalman.current_state()[0]
@@ -56,7 +57,7 @@ class KalmanWeather(PandasMaster):
 
 if __name__=='__main__':
 
-   weatherman = KalmanWeather(file='weather_data.csv', number_of_locations=5,\
+   weatherman = KalmanWeather(file='weather_data.csv', number_of_locations=500,\
                               pfile='predict.csv', xfile='xv.csv', tfile='test.csv') # initialize the class object
    #weatherman.next_year_forecast() # perform the forecast and output to csv file
            
