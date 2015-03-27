@@ -3,6 +3,8 @@ PandasMaster test set
 """
 import unittest
 import os
+import sys
+sys.path.insert(0,'../')
 from pandas_master import PandasMaster
 
 class TestPandasMaster(unittest.TestCase):
@@ -11,7 +13,7 @@ class TestPandasMaster(unittest.TestCase):
           """
           Essentially testing that init goes through
           """
-          self.file    = 'weather_data.csv'
+          self.file    = '../weather_data.csv'
           self.num_col = 20       
           self.pfile   = 'predict_test.csv'
           self.xfile   = 'xv_test.csv'
@@ -21,6 +23,7 @@ class TestPandasMaster(unittest.TestCase):
                                          pfile = self.pfile,
                                          xfile = self.xfile,
                                          tfile = self.tfile)
+          self.series = range(10)
 
 
       def tearDown(self):
@@ -64,6 +67,34 @@ class TestPandasMaster(unittest.TestCase):
                                               day = 25)
           self.assertTrue(isinstance(t, int))
           self.assertTrue(-100 < t < 100)
+
+
+      def test_filter(self):
+          """
+          Tests whether filter returns a list of same length as input list.
+          Also tests whether it filters only up to the index indicated
+          """
+          s = self.weatherman.filter(self.series, len(self.series)-1)
+          self.assertTrue(len(s), len(self.series))
+          self.assertEqual(s[-1],self.series[-1])
+          
+
+      def test_get_sets(self):
+          """
+          Tests whether the inputs are constructed with equal length across sets
+          """
+          trset, xvset, teset = self.weatherman.get_sets(1,1,1,3,filter=False)
+          self.assertTrue(len(trset[0][0]) == len(xvset[0][0]) == len(teset[0][0]))
+
+
+      def test_learn(self):
+          """
+          Tests whether learn is returning the right format
+          """
+          results = self.weatherman.learn(1,1,1,filter=False)
+          self.assertTrue(isinstance(results['predict'],float))
+          self.assertTrue(isinstance(results['xverr'],float))
+          self.assertTrue(isinstance(results['terr'],float))
 
 
 if __name__ == '__main__':
