@@ -18,15 +18,15 @@ class KalmanWeather(PandasMaster):
           data_set = tr_set + xv_set + ts_set  # I actually want all data strung together to improve the filter
           years, temperatures = self.day_history(location, month, day)
           E = float(max(temperatures) - min(temperatures)) / 2.0 # approximate the noise covariance
-          kalman = Kalman1D( A = numpy.matrix([1]), B = numpy.matrix([0]), H = numpy.matrix([1]),
-                             x0 = numpy.matrix(data_set[0][1]), P0 = numpy.matrix([E]),
-                             Q = numpy.matrix([E]), R = numpy.matrix([E]) ) # initialize the filter
-          u = numpy.matrix([0]) # the control vector is 0 in this case
+          kalman = Kalman1D( A = np.matrix([1]), B = np.matrix([0]), H = np.matrix([1]),
+                             x0 = np.matrix(data_set[0][1]), P0 = np.matrix([E]),
+                             Q = np.matrix([E]), R = np.matrix([E]) ) # initialize the filter
+          u = np.matrix([0]) # the control vector is 0 in this case
           for data in data_set: # if n_prior_years = 30, this should really just be one 
-              kalman.update(u, numpy.matrix(data[1]))
+              kalman.update(u, np.matrix(data[1]))
           x, P = kalman.current_state()
           return dict(obj=kalman, n_prior_years=0, predict=x,
-                      xverr=numpy.sqrt(P), terr=numpy.sqrt(P) )
+                      xverr=np.sqrt(P), terr=np.sqrt(P) )
 
  
       def create_date_list(self, year=1980):
